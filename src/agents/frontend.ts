@@ -3,18 +3,18 @@
  * Specializes in React, Tailwind CSS, and mobile-first design
  */
 
-import { BeeAgent } from 'bee-agent-framework/agents/bee/agent';
-import { TokenMemory } from 'bee-agent-framework/memory/tokenMemory';
-import { GroqChatLLM } from 'bee-agent-framework/adapters/groq/chat';
-import { DynamicTool } from 'bee-agent-framework/tools/base';
+import { ReActAgent } from 'beeai-framework/agents/react/agent';
+import { UnconstrainedMemory } from 'beeai-framework/memory/unconstrainedMemory';
+import { GroqChatModel } from 'beeai-framework/adapters/groq/backend/chat';
+import { DynamicTool, StringToolOutput } from 'beeai-framework/tools/base';
 import { FileSystemTool } from '../tools/filesystem.js';
 import { AgentTask, AgentResponse } from '../types/index.js';
 
 export class FrontendAgent {
-  private agent: BeeAgent;
+  private agent: ReActAgent;
   private fileSystemTool: FileSystemTool;
 
-  constructor(private llm: GroqChatLLM, basePath: string = process.cwd()) {
+  constructor(private llm: GroqChatModel, basePath: string = process.cwd()) {
     this.fileSystemTool = new FileSystemTool(basePath);
 
     // Create Bee-compatible file system tool
@@ -23,14 +23,15 @@ export class FrontendAgent {
       description: 'Read and write files for React component generation',
       inputSchema: FileSystemTool.getToolDefinition().inputSchema,
       handler: async (input) => {
-        return await this.fileSystemTool.execute(input);
+        const result = await this.fileSystemTool.execute(input);
+        return new StringToolOutput(JSON.stringify(result));
       },
     });
 
     // Initialize the Frontend agent with file system tools
-    this.agent = new BeeAgent({
+    this.agent = new ReActAgent({
       llm: this.llm,
-      memory: new TokenMemory({ llm: this.llm }),
+      memory: new UnconstrainedMemory(),
       tools: [fsToolWrapper],
     });
   }
@@ -127,9 +128,9 @@ Provide only the component code, no explanations.`;
   }
 
   /**
-   * Get the underlying Bee agent
+   * Get the underlying ReAct agent
    */
-  getAgent(): BeeAgent {
+  getAgent(): ReActAgent {
     return this.agent;
   }
 }

@@ -3,7 +3,7 @@
  * Coordinates multiple agents in the Architect-Worker pattern
  */
 
-import { GroqChatLLM } from 'bee-agent-framework/adapters/groq/chat';
+import { GroqChatModel } from 'beeai-framework/adapters/groq/backend/chat';
 import { ArchitectAgent } from './agents/architect.js';
 import { FrontendAgent } from './agents/frontend.js';
 import { BackendAgent } from './agents/backend.js';
@@ -31,16 +31,13 @@ export class AgenticSwarm {
 
   constructor(
     private config: SwarmConfig,
-    private basePath: string = process.cwd(),
-    private mongoUri?: string,
-    private deployConfig?: DeploymentConfig
+    basePath: string = process.cwd(),
+    mongoUri?: string,
+    deployConfig?: DeploymentConfig
   ) {
     // Initialize Groq LLM
-    const llm = new GroqChatLLM({
-      modelId: config.modelName,
-      client: {
-        apiKey: config.groqApiKey,
-      },
+    const llm = new GroqChatModel(config.modelName as any, undefined, {
+      apiKey: config.groqApiKey,
     });
 
     // Initialize all agents

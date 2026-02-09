@@ -3,21 +3,21 @@
  * Specializes in API design, Express.js, and database operations
  */
 
-import { BeeAgent } from 'bee-agent-framework/agents/bee/agent';
-import { TokenMemory } from 'bee-agent-framework/memory/tokenMemory';
-import { GroqChatLLM } from 'bee-agent-framework/adapters/groq/chat';
-import { DynamicTool } from 'bee-agent-framework/tools/base';
+import { ReActAgent } from 'beeai-framework/agents/react/agent';
+import { UnconstrainedMemory } from 'beeai-framework/memory/unconstrainedMemory';
+import { GroqChatModel } from 'beeai-framework/adapters/groq/backend/chat';
+import { DynamicTool, StringToolOutput } from 'beeai-framework/tools/base';
 import { FileSystemTool } from '../tools/filesystem.js';
 import { MongoDBTool } from '../tools/mongodb.js';
 import { AgentTask, AgentResponse } from '../types/index.js';
 
 export class BackendAgent {
-  private agent: BeeAgent;
+  private agent: ReActAgent;
   private fileSystemTool: FileSystemTool;
   private mongoTool?: MongoDBTool;
 
   constructor(
-    private llm: GroqChatLLM,
+    private llm: GroqChatModel,
     basePath: string = process.cwd(),
     mongoUri?: string
   ) {
@@ -34,7 +34,8 @@ export class BackendAgent {
       description: 'Read and write files for backend code generation',
       inputSchema: FileSystemTool.getToolDefinition().inputSchema,
       handler: async (input) => {
-        return await this.fileSystemTool.execute(input);
+        const result = await this.fileSystemTool.execute(input);
+        return new StringToolOutput(JSON.stringify(result));
       },
     });
     tools.push(fsToolWrapper);
@@ -46,16 +47,17 @@ export class BackendAgent {
         description: 'Execute MongoDB operations',
         inputSchema: MongoDBTool.getToolDefinition().inputSchema,
         handler: async (input) => {
-          return await this.mongoTool!.execute(input);
+          const result = await this.mongoTool!.execute(input);
+          return new StringToolOutput(JSON.stringify(result));
         },
       });
       tools.push(mongoToolWrapper);
     }
 
     // Initialize the Backend agent
-    this.agent = new BeeAgent({
+    this.agent = new ReActAgent({
       llm: this.llm,
-      memory: new TokenMemory({ llm: this.llm }),
+      memory: new UnconstrainedMemory(),
       tools,
     });
   }
@@ -155,9 +157,9 @@ Provide only the endpoint code, no explanations.`;
   }
 
   /**
-   * Get the underlying Bee agent
+   * Get the underlying ReAct agent
    */
-  getAgent(): BeeAgent {
+  getAgent(): ReActAgent {
     return this.agent;
   }
 }

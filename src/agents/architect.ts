@@ -3,19 +3,19 @@
  * Breaks down user prompts into actionable tasks and routes to specialized agents
  */
 
-import { BeeAgent } from 'bee-agent-framework/agents/bee/agent';
-import { TokenMemory } from 'bee-agent-framework/memory/tokenMemory';
-import { GroqChatLLM } from 'bee-agent-framework/adapters/groq/chat';
+import { ReActAgent } from 'beeai-framework/agents/react/agent';
+import { UnconstrainedMemory } from 'beeai-framework/memory/unconstrainedMemory';
+import { GroqChatModel } from 'beeai-framework/adapters/groq/backend/chat';
 import { AgentTask, AgentRole, TaskStatus } from '../types/index.js';
 
 export class ArchitectAgent {
-  private agent: BeeAgent;
+  private agent: ReActAgent;
 
-  constructor(private llm: GroqChatLLM) {
+  constructor(private llm: GroqChatModel) {
     // Initialize the Architect agent with specific instructions
-    this.agent = new BeeAgent({
+    this.agent = new ReActAgent({
       llm: this.llm,
-      memory: new TokenMemory({ llm: this.llm }),
+      memory: new UnconstrainedMemory(),
       tools: [],
     });
   }
@@ -150,9 +150,9 @@ Your response:`;
   }
 
   /**
-   * Get the underlying Bee agent
+   * Get the underlying ReAct agent
    */
-  getAgent(): BeeAgent {
+  getAgent(): ReActAgent {
     return this.agent;
   }
 }

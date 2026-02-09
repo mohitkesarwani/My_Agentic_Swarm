@@ -24,7 +24,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "bee-agent-framework": "^0.0.111",
+    "beeai-framework": "^0.1.26",
     "dotenv": "^16.4.5",
     "groq-sdk": "^0.8.0",
     "mongoose": "^8.9.2"
