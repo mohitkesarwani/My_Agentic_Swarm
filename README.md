@@ -133,21 +133,21 @@ My_Agentic_Swarm/
 │   ├── types/                    # TypeScript type definitions
 │   ├── swarm.ts                  # Main orchestrator
 │   └── index.ts                  # Entry point
-├── generated/                    # Agent-generated code (gitignored)
-│   ├── frontend/                 # React applications
-│   │   ├── src/
-│   │   │   ├── components/       # React components
-│   │   │   ├── pages/            # Page components
-│   │   │   ├── styles/           # Tailwind CSS
-│   │   │   └── App.tsx           # Main app
-│   │   └── package.json
-│   └── backend/                  # Express applications
-│       ├── src/
+├── solutions/                    # Agent-generated deliverables (gitignored)
+│   └── deliverables/             # Organized by agent type
+│       ├── frontend/             # Frontend Agent outputs
+│       │   ├── components/       # React components
+│       │   ├── pages/            # Page components
+│       │   ├── styles/           # Tailwind CSS
+│       │   └── App.tsx           # Main app
+│       ├── backend/              # Backend Agent outputs
 │       │   ├── routes/           # API routes
 │       │   ├── models/           # MongoDB models
 │       │   ├── middleware/       # Express middleware
 │       │   └── server.ts         # Server entry
-│       └── package.json
+│       └── qa/                   # QA Agent outputs
+│           ├── tests/            # Test files
+│           └── reports/          # Quality reports
 ├── package.json                  # Root dependencies (swarm system)
 ├── tsconfig.json                 # TypeScript configuration
 └── .env                          # Environment variables
@@ -197,6 +197,13 @@ RENDER_DEPLOY_HOOK=https://api.render.com/deploy/srv-xxxxx?key=xxxxx
 # Agent configuration
 ARCHITECT_MODEL=llama-3.3-70b-versatile
 WORKER_MODEL=llama-3.3-70b-versatile
+
+# Optional: MCP Server Configuration (Model Context Protocol for fetching latest information)
+# Note: MCP (Model Context Protocol) is optional and enhances agent capabilities.
+# These are placeholder values - replace with your actual MCP server credentials if you have them.
+# If you don't have MCP server access, leave these empty or commented out.
+MCP_API_URL=https://api.mcp.example.com
+MCP_API_KEY=your_mcp_api_key_here
 
 # Logging level: debug, info, warn, error
 LOG_LEVEL=info
@@ -714,6 +721,23 @@ WORKER_MODEL=llama-3.3-70b-versatile
 
 # For faster iterations, you can use a lighter model for workers:
 # WORKER_MODEL=llama-3.1-8b-instant
+
+
+#===========================================
+# MCP SERVER CONFIGURATION (OPTIONAL)
+#===========================================
+
+# Model Context Protocol Server for fetching latest information
+# Used to enhance agent capabilities with up-to-date information
+# Note: MCP (Model Context Protocol) is optional and enhances agent capabilities.
+# These are placeholder values - replace with your actual MCP server credentials if you have them.
+# If you don't have MCP server access, leave these empty or commented out.
+MCP_API_URL=https://api.mcp.example.com
+MCP_API_KEY=your_mcp_api_key_here
+
+# Leave empty if not using MCP Server
+# MCP_API_URL=
+# MCP_API_KEY=
 
 
 #===========================================

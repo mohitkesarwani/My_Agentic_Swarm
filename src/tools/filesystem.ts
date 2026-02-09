@@ -11,17 +11,43 @@ import { FileOperation } from '../types/index.js';
  * File System Tool Class
  */
 export class FileSystemTool {
-  constructor(private basePath: string = process.cwd()) {}
+  private solutionsBasePath: string;
+
+  constructor(private basePath: string = process.cwd(), agentType?: string) {
+    // Set up solutions directory structure based on agent type
+    if (agentType) {
+      this.solutionsBasePath = path.join(this.basePath, 'solutions', 'deliverables', agentType);
+    } else {
+      this.solutionsBasePath = path.join(this.basePath, 'solutions', 'deliverables');
+    }
+  }
+
+  /**
+   * Get the solutions base path for this agent
+   */
+  getSolutionsPath(): string {
+    return this.solutionsBasePath;
+  }
 
   /**
    * Execute a file operation
    */
   async execute(operation: FileOperation): Promise<{ success: boolean; message: string; data?: string }> {
     try {
-      const fullPath = path.resolve(this.basePath, operation.path);
+      // For create operations, use solutions path by default unless path is absolute
+      let fullPath: string;
+      let usesSolutionsPath = false;
+      if (operation.type === 'create' && !path.isAbsolute(operation.path)) {
+        fullPath = path.resolve(this.solutionsBasePath, operation.path);
+        usesSolutionsPath = true;
+      } else {
+        fullPath = path.resolve(this.basePath, operation.path);
+      }
 
-      // Security check: ensure path is within base directory
-      if (!fullPath.startsWith(this.basePath)) {
+      // Security check: ensure path is within base directory or solutions directory
+      const allowedPath = usesSolutionsPath ? this.solutionsBasePath : this.basePath;
+      const relativePath = path.relative(allowedPath, fullPath);
+      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
         throw new Error('Path traversal not allowed');
       }
 

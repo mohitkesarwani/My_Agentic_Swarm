@@ -40,6 +40,8 @@ async function main() {
     logLevel: (process.env.LOG_LEVEL as any) || 'info',
     groqApiKey,
     modelName: process.env.ARCHITECT_MODEL || 'llama-3.3-70b-versatile',
+    mcpApiUrl: process.env.MCP_API_URL,
+    mcpApiKey: process.env.MCP_API_KEY,
   };
 
   // Optional MongoDB configuration

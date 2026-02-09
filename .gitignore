@@ -40,3 +40,7 @@ coverage/
 tmp/
 temp/
 *.tmp
+
+# Generated solutions and deliverables
+solutions/
+generated/

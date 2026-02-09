@@ -15,12 +15,12 @@ export class QAAgent {
   private fileSystemTool: FileSystemTool;
 
   constructor(private llm: GroqChatModel, basePath: string = process.cwd()) {
-    this.fileSystemTool = new FileSystemTool(basePath);
+    this.fileSystemTool = new FileSystemTool(basePath, 'qa');
 
     // Create Bee-compatible file system tool
     const fsToolWrapper = new DynamicTool({
       name: 'filesystem',
-      description: 'Read and write test files',
+      description: 'Read and write test files. Test files will be saved to solutions/deliverables/qa/ directory.',
       inputSchema: FileSystemTool.getToolDefinition().inputSchema,
       handler: async (input: any) => {
         const result = await this.fileSystemTool.execute(input);
@@ -58,6 +58,8 @@ Instructions:
 3. Verify functionality and edge cases
 4. Report any issues or bugs found
 5. Use the filesystem tool to read code and create test files
+6. All test files will be automatically saved to solutions/deliverables/qa/ directory
+7. Use relative paths when creating test files (e.g., 'tests/user.test.ts' will be saved to solutions/deliverables/qa/tests/user.test.ts)
 
 Provide a detailed report of:
 - Tests created
