@@ -22,7 +22,7 @@ export class FrontendAgent {
       name: 'filesystem',
       description: 'Read and write files for React component generation',
       inputSchema: FileSystemTool.getToolDefinition().inputSchema,
-      handler: async (input) => {
+      handler: async (input: any) => {
         const result = await this.fileSystemTool.execute(input);
         return new StringToolOutput(JSON.stringify(result));
       },

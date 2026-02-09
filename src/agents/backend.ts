@@ -33,7 +33,7 @@ export class BackendAgent {
       name: 'filesystem',
       description: 'Read and write files for backend code generation',
       inputSchema: FileSystemTool.getToolDefinition().inputSchema,
-      handler: async (input) => {
+      handler: async (input: any) => {
         const result = await this.fileSystemTool.execute(input);
         return new StringToolOutput(JSON.stringify(result));
       },
@@ -46,7 +46,7 @@ export class BackendAgent {
         name: 'mongodb',
         description: 'Execute MongoDB operations',
         inputSchema: MongoDBTool.getToolDefinition().inputSchema,
-        handler: async (input) => {
+        handler: async (input: any) => {
           const result = await this.mongoTool!.execute(input);
           return new StringToolOutput(JSON.stringify(result));
         },
