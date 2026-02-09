@@ -199,6 +199,8 @@ ARCHITECT_MODEL=llama-3.3-70b-versatile
 WORKER_MODEL=llama-3.3-70b-versatile
 
 # Optional: MCP Server Configuration (Model Context Protocol for fetching latest information)
+# Note: These are example values. Replace with your actual MCP server credentials.
+# Leave empty if not using MCP Server.
 MCP_API_URL=https://api.mcp.example.com
 MCP_API_KEY=your_mcp_api_key_here
 
@@ -726,6 +728,7 @@ WORKER_MODEL=llama-3.3-70b-versatile
 
 # Model Context Protocol Server for fetching latest information
 # Used to enhance agent capabilities with up-to-date information
+# Note: These are example values. Replace with your actual MCP server credentials.
 MCP_API_URL=https://api.mcp.example.com
 MCP_API_KEY=your_mcp_api_key_here
 

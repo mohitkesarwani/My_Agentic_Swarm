@@ -13,7 +13,7 @@ import { FileOperation } from '../types/index.js';
 export class FileSystemTool {
   private solutionsBasePath: string;
 
-  constructor(private basePath: string = process.cwd(), private agentType?: string) {
+  constructor(private basePath: string = process.cwd(), agentType?: string) {
     // Set up solutions directory structure based on agent type
     if (agentType) {
       this.solutionsBasePath = path.join(this.basePath, 'solutions', 'deliverables', agentType);
@@ -36,14 +36,17 @@ export class FileSystemTool {
     try {
       // For create operations, use solutions path by default unless path is absolute
       let fullPath: string;
+      let usesSolutionsPath = false;
       if (operation.type === 'create' && !path.isAbsolute(operation.path)) {
         fullPath = path.resolve(this.solutionsBasePath, operation.path);
+        usesSolutionsPath = true;
       } else {
         fullPath = path.resolve(this.basePath, operation.path);
       }
 
       // Security check: ensure path is within base directory or solutions directory
-      if (!fullPath.startsWith(this.basePath)) {
+      const allowedPath = usesSolutionsPath ? this.solutionsBasePath : this.basePath;
+      if (!fullPath.startsWith(allowedPath)) {
         throw new Error('Path traversal not allowed');
       }
 
