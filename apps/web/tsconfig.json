@@ -1,0 +1,7 @@
+{
+  "extends": "@agentic-swarm/config/tsconfig/react",
+  "compilerOptions": {
+    "outDir": "./dist"
+  },
+  "include": ["src"]
+}
