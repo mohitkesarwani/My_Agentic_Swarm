@@ -84,6 +84,11 @@ RENDER_DEPLOY_HOOK=https://api.render.com/deploy/srv-xxxxx?key=xxxxx
 ARCHITECT_MODEL=llama-3.3-70b-versatile
 WORKER_MODEL=llama-3.3-70b-versatile
 
+# Optional: MCP Server Configuration (Model Context Protocol)
+# Used for fetching latest information and enhancing agent capabilities
+MCP_API_URL=https://api.mcp.example.com
+MCP_API_KEY=your_mcp_api_key_here
+
 # Logging level: debug, info, warn, error
 LOG_LEVEL=info
 ```
@@ -140,6 +145,37 @@ npm start "Create a blog application with React frontend, Express backend, and M
 ```bash
 npm start "Write comprehensive Jest tests for the user authentication module"
 ```
+
+## Generated Deliverables Structure
+
+The agentic swarm organizes all generated code and deliverables into a structured directory:
+
+```
+solutions/
+└── deliverables/
+    ├── frontend/        # All Frontend Agent outputs
+    │   ├── components/  # React components
+    │   ├── pages/       # Page components
+    │   ├── styles/      # CSS and styling
+    │   └── ...          # Other frontend files
+    ├── backend/         # All Backend Agent outputs
+    │   ├── routes/      # API routes
+    │   ├── models/      # Database models
+    │   ├── middleware/  # Express middleware
+    │   └── ...          # Other backend files
+    └── qa/              # All QA Agent outputs
+        ├── tests/       # Test files
+        ├── reports/     # Quality reports
+        └── ...          # Other QA deliverables
+```
+
+**Key Points:**
+- All agent-generated files are automatically organized by agent type
+- The `solutions/` directory is gitignored to keep the repository clean
+- Each agent saves its work to its designated subfolder
+- Frontend components go to `solutions/deliverables/frontend/`
+- Backend APIs go to `solutions/deliverables/backend/`
+- Test files go to `solutions/deliverables/qa/`
 
 ## MongoDB Setup
 

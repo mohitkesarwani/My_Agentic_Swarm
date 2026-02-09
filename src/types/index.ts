@@ -45,6 +45,8 @@ export interface SwarmConfig {
   logLevel: 'debug' | 'info' | 'warn' | 'error';
   groqApiKey: string;
   modelName: string;
+  mcpApiUrl?: string;
+  mcpApiKey?: string;
 }
 
 /**

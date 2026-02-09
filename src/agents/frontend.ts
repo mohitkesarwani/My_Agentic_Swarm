@@ -15,12 +15,12 @@ export class FrontendAgent {
   private fileSystemTool: FileSystemTool;
 
   constructor(private llm: GroqChatModel, basePath: string = process.cwd()) {
-    this.fileSystemTool = new FileSystemTool(basePath);
+    this.fileSystemTool = new FileSystemTool(basePath, 'frontend');
 
     // Create Bee-compatible file system tool
     const fsToolWrapper = new DynamicTool({
       name: 'filesystem',
-      description: 'Read and write files for React component generation',
+      description: 'Read and write files for React component generation. Files will be saved to solutions/deliverables/frontend/ directory.',
       inputSchema: FileSystemTool.getToolDefinition().inputSchema,
       handler: async (input: any) => {
         const result = await this.fileSystemTool.execute(input);
@@ -57,6 +57,8 @@ Instructions:
 3. Ensure mobile-first responsive design
 4. Follow React best practices
 5. Use the filesystem tool to create/update files
+6. All generated files will be automatically saved to solutions/deliverables/frontend/ directory
+7. Use relative paths when creating files (e.g., 'components/Button.tsx' will be saved to solutions/deliverables/frontend/components/Button.tsx)
 
 Provide a detailed description of what you created or modified.`;
 

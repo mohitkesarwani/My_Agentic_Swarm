@@ -21,7 +21,7 @@ export class BackendAgent {
     basePath: string = process.cwd(),
     mongoUri?: string
   ) {
-    this.fileSystemTool = new FileSystemTool(basePath);
+    this.fileSystemTool = new FileSystemTool(basePath, 'backend');
     if (mongoUri) {
       this.mongoTool = new MongoDBTool(mongoUri);
     }
@@ -31,7 +31,7 @@ export class BackendAgent {
     // File system tool
     const fsToolWrapper = new DynamicTool({
       name: 'filesystem',
-      description: 'Read and write files for backend code generation',
+      description: 'Read and write files for backend code generation. Files will be saved to solutions/deliverables/backend/ directory.',
       inputSchema: FileSystemTool.getToolDefinition().inputSchema,
       handler: async (input: any) => {
         const result = await this.fileSystemTool.execute(input);
@@ -85,6 +85,8 @@ Instructions:
 4. Use Mongoose for database operations (if needed)
 5. Follow REST best practices
 6. Use the filesystem tool to create/update files
+7. All generated files will be automatically saved to solutions/deliverables/backend/ directory
+8. Use relative paths when creating files (e.g., 'routes/users.ts' will be saved to solutions/deliverables/backend/routes/users.ts)
 
 Provide a detailed description of what you created or modified.`;
 
