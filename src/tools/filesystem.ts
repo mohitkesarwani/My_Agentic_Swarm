@@ -46,7 +46,8 @@ export class FileSystemTool {
 
       // Security check: ensure path is within base directory or solutions directory
       const allowedPath = usesSolutionsPath ? this.solutionsBasePath : this.basePath;
-      if (!fullPath.startsWith(allowedPath)) {
+      const relativePath = path.relative(allowedPath, fullPath);
+      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
         throw new Error('Path traversal not allowed');
       }
 

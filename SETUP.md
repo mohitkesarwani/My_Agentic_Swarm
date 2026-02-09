@@ -86,8 +86,9 @@ WORKER_MODEL=llama-3.3-70b-versatile
 
 # Optional: MCP Server Configuration (Model Context Protocol)
 # Used for fetching latest information and enhancing agent capabilities
-# Note: These are example values. Replace with your actual MCP server credentials.
-# Leave empty if not using MCP Server.
+# Note: MCP (Model Context Protocol) is optional and enhances agent capabilities.
+# These are placeholder values - replace with your actual MCP server credentials if you have them.
+# If you don't have MCP server access, leave these empty or commented out.
 MCP_API_URL=https://api.mcp.example.com
 MCP_API_KEY=your_mcp_api_key_here
 
