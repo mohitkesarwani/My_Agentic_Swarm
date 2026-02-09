@@ -69,6 +69,8 @@ cd My_Agentic_Swarm
 npm install
 ```
 
+**Note**: The project uses `.npmrc` with `legacy-peer-deps=true` to handle peer dependency resolution with beeai-framework.
+
 3. Configure environment:
 ```bash
 cp .env.example .env

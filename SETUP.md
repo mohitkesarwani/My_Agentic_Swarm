@@ -41,10 +41,12 @@ npm install
 ```
 
 This will install all required packages including:
-- IBM Bee Agent Framework
+- BeeAI Framework (renamed from Bee Agent Framework)
 - Groq SDK
 - Mongoose
 - TypeScript and build tools
+
+**Note**: The project uses `.npmrc` with `legacy-peer-deps=true` to handle peer dependency conflicts with beeai-framework. This is automatically configured when you clone the repository.
 
 ### Step 3: Build the Project
 
