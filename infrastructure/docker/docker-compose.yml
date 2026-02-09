@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.api
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      API_PORT: "3001"
+      API_HOST: "0.0.0.0"
+      MONGODB_URI: mongodb://mongo:27017/agentic_swarm
+      CORS_ORIGINS: "http://localhost:5173"
+      LOG_LEVEL: info
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.web
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://api:3001
+    depends_on:
+      - api
+
+volumes:
+  mongo-data:
