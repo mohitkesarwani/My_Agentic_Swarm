@@ -1,5 +1,5 @@
 {
-  "extends": "@agentic-swarm/config/tsconfig/react",
+  "extends": "../../packages/config/tsconfig.react.json",
   "compilerOptions": {
     "outDir": "./dist"
   },

@@ -3,7 +3,6 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { env } from './config/env.js';
-import { logger } from './config/logger.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { requestIdHook } from './middleware/request-id.js';
 import { healthRoutes } from './routes/health.js';
@@ -11,8 +10,7 @@ import { userRoutes } from './routes/v1/users.js';
 
 export async function buildApp() {
   const app = Fastify({
-    logger: false, // we use our own pino logger
-    requestId: undefined,
+    logger: false,
     genReqId: () => crypto.randomUUID(),
   });
 
