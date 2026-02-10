@@ -5,7 +5,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { FileOperation } from '../types/index.js';
+import { FileOperation, IsolationContext } from '../types/index.js';
 
 /**
  * File System Tool Class
@@ -13,9 +13,26 @@ import { FileOperation } from '../types/index.js';
 export class FileSystemTool {
   private solutionsBasePath: string;
 
-  constructor(private basePath: string = process.cwd(), agentType?: string) {
-    // Set up solutions directory structure based on agent type
-    if (agentType) {
+  constructor(
+    private basePath: string = process.cwd(),
+    agentType?: string,
+    private isolation?: IsolationContext
+  ) {
+    // Set up solutions directory structure with user/project/build isolation
+    if (isolation && agentType) {
+      this.solutionsBasePath = path.join(
+        this.basePath,
+        'solutions',
+        'users',
+        isolation.userId,
+        'projects',
+        isolation.projectId,
+        'builds',
+        isolation.buildRequestId,
+        agentType
+      );
+    } else if (agentType) {
+      // Legacy fallback for CLI mode (no isolation)
       this.solutionsBasePath = path.join(this.basePath, 'solutions', 'deliverables', agentType);
     } else {
       this.solutionsBasePath = path.join(this.basePath, 'solutions', 'deliverables');

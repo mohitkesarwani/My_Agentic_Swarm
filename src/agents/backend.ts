@@ -9,7 +9,7 @@ import { GroqChatModel } from 'beeai-framework/adapters/groq/backend/chat';
 import { DynamicTool, StringToolOutput } from 'beeai-framework/tools/base';
 import { FileSystemTool } from '../tools/filesystem.js';
 import { MongoDBTool } from '../tools/mongodb.js';
-import { AgentTask, AgentResponse } from '../types/index.js';
+import { AgentTask, AgentResponse, IsolationContext } from '../types/index.js';
 
 export class BackendAgent {
   private agent: ReActAgent;
@@ -19,9 +19,10 @@ export class BackendAgent {
   constructor(
     private llm: GroqChatModel,
     basePath: string = process.cwd(),
-    mongoUri?: string
+    mongoUri?: string,
+    isolation?: IsolationContext
   ) {
-    this.fileSystemTool = new FileSystemTool(basePath, 'backend');
+    this.fileSystemTool = new FileSystemTool(basePath, 'backend', isolation);
     if (mongoUri) {
       this.mongoTool = new MongoDBTool(mongoUri);
     }

@@ -16,6 +16,7 @@ import {
   SwarmConfig,
   WorkflowState,
   DeploymentConfig,
+  IsolationContext,
 } from './types/index.js';
 
 /**
@@ -33,18 +34,19 @@ export class AgenticSwarm {
     private config: SwarmConfig,
     basePath: string = process.cwd(),
     mongoUri?: string,
-    deployConfig?: DeploymentConfig
+    deployConfig?: DeploymentConfig,
+    private isolation?: IsolationContext
   ) {
     // Initialize Groq LLM
     const llm = new GroqChatModel(config.modelName as any, undefined, {
       apiKey: config.groqApiKey,
     });
 
-    // Initialize all agents
+    // Initialize all agents with isolation context
     this.architectAgent = new ArchitectAgent(llm);
-    this.frontendAgent = new FrontendAgent(llm, basePath);
-    this.backendAgent = new BackendAgent(llm, basePath, mongoUri);
-    this.qaAgent = new QAAgent(llm, basePath);
+    this.frontendAgent = new FrontendAgent(llm, basePath, isolation);
+    this.backendAgent = new BackendAgent(llm, basePath, mongoUri, isolation);
+    this.qaAgent = new QAAgent(llm, basePath, isolation);
 
     // Initialize deployment tool if configured
     if (deployConfig) {
