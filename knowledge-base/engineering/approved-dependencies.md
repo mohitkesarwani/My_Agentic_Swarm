@@ -7,9 +7,11 @@
 | @fastify/cors | ^10.x | CORS |
 | @fastify/helmet | ^13.x | Security headers |
 | @fastify/rate-limit | ^10.x | Rate limiting |
+| @fastify/jwt | ^9.x | JWT authentication for Fastify |
 | mongoose | ^8.x | MongoDB ODM |
 | pino | ^9.x | Structured logging |
 | zod | ^3.x | Schema validation |
+| bcryptjs | ^2.x | Password hashing |
 | react | ^19.x | UI library |
 | react-dom | ^19.x | React DOM |
 | react-router-dom | ^7.x | Routing |
@@ -23,6 +25,7 @@
 | prettier | ^3.x | Formatter |
 | tsx | ^4.x | TS execution |
 | vite | ^6.x | Bundler |
+| @types/bcryptjs | ^2.x | TypeScript types for bcryptjs |
 
 ## Adding Dependencies
 1. Check this list first

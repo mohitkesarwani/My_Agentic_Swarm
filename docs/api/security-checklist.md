@@ -10,10 +10,10 @@
 - [x] Structured logging with PII redaction
 - [x] Request-ID correlation
 - [x] Safe MongoDB connection defaults
+- [x] JWT authentication middleware (@fastify/jwt, see ADR-002)
 
 ## Planned Controls
 
-- [ ] JWT/OIDC authentication middleware
 - [ ] RBAC authorization middleware
 - [ ] API key rotation procedure
 - [ ] Input sanitization for NoSQL injection
@@ -23,7 +23,7 @@
 | # | Risk | Mitigation |
 |---|------|-----------|
 | API1 | Broken Object Level Authorization | RBAC hooks (placeholder) |
-| API2 | Broken Authentication | OIDC/JWT-ready (ADR-001) |
+| API2 | Broken Authentication | JWT password auth implemented (ADR-002) |
 | API3 | Broken Object Property Level Authorization | Zod schema validation |
 | API4 | Unrestricted Resource Consumption | Rate limiting, pagination limits |
 | API5 | Broken Function Level Authorization | RBAC-ready route guards |
