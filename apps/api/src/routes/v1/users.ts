@@ -3,6 +3,11 @@ import { z } from 'zod';
 import { User } from '../../models/user.model.js';
 import { requireAuth } from '../../middleware/auth.js';
 
+const createUserSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+});
+
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
 });
@@ -12,6 +17,52 @@ const updateUserSchema = z.object({
  * Note: For most user operations, use /v1/auth routes instead
  */
 export async function userRoutes(app: FastifyInstance) {
+  // Create user (unprotected for testing - creates user without password)
+  app.post<{ Body: { name: string; email: string } }>(
+    '/',
+    async (request, reply) => {
+      try {
+        const data = createUserSchema.parse(request.body);
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email: data.email });
+        if (existingUser) {
+          return reply.status(409).send({
+            statusCode: 409,
+            error: 'Conflict',
+            message: 'User with this email already exists',
+          });
+        }
+
+        // Create user with a default password hash (for testing purposes)
+        const user = await User.create({
+          name: data.name,
+          email: data.email,
+          passwordHash: 'test-password-hash-not-for-production',
+        });
+
+        return reply.status(201).send({
+          data: {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            createdAt: user.createdAt.toISOString(),
+          },
+        });
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return reply.status(400).send({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'Validation error',
+            details: error.issues,
+          });
+        }
+        throw error;
+      }
+    }
+  );
+
   // List users (protected)
   app.get(
     '/',

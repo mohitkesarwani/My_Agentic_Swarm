@@ -18,5 +18,12 @@ const envSchema = z.object({
   ARCHITECT_MODEL: z.string().default('llama-3.3-70b-versatile'),
 });
 
-export const env = envSchema.parse(process.env);
+const parsed = envSchema.parse(process.env);
+
+// Use test database when NODE_ENV is 'test'
+if (parsed.NODE_ENV === 'test' && !process.env.MONGODB_URI) {
+  parsed.MONGODB_URI = 'mongodb://localhost:27017/agentic_swarm_test';
+}
+
+export const env = parsed;
 export type Env = z.infer<typeof envSchema>;
