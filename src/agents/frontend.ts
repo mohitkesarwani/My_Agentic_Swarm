@@ -8,14 +8,18 @@ import { UnconstrainedMemory } from 'beeai-framework/memory/unconstrainedMemory'
 import { GroqChatModel } from 'beeai-framework/adapters/groq/backend/chat';
 import { DynamicTool, StringToolOutput } from 'beeai-framework/tools/base';
 import { FileSystemTool } from '../tools/filesystem.js';
-import { AgentTask, AgentResponse } from '../types/index.js';
+import { AgentTask, AgentResponse, IsolationContext } from '../types/index.js';
 
 export class FrontendAgent {
   private agent: ReActAgent;
   private fileSystemTool: FileSystemTool;
 
-  constructor(private llm: GroqChatModel, basePath: string = process.cwd()) {
-    this.fileSystemTool = new FileSystemTool(basePath, 'frontend');
+  constructor(
+    private llm: GroqChatModel,
+    basePath: string = process.cwd(),
+    isolation?: IsolationContext
+  ) {
+    this.fileSystemTool = new FileSystemTool(basePath, 'frontend', isolation);
 
     // Create Bee-compatible file system tool
     const fsToolWrapper = new DynamicTool({

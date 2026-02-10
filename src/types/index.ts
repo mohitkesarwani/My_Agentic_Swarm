@@ -3,6 +3,15 @@
  */
 
 /**
+ * Isolation context for multi-user/project support
+ */
+export interface IsolationContext {
+  userId: string;
+  projectId: string;
+  buildRequestId: string;
+}
+
+/**
  * Supported agent roles in the swarm
  */
 export enum AgentRole {

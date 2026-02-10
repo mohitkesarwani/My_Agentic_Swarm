@@ -1,62 +1,118 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { User } from '../../models/user.model.js';
+import { requireAuth } from '../../middleware/auth.js';
 
-const createUserSchema = z.object({
-  name: z.string().min(1).max(200),
-  email: z.string().email().max(254),
+const updateUserSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
 });
 
-const updateUserSchema = createUserSchema.partial();
-
 /**
- * /v1/users CRUD stub
- * Replace in-memory store with Mongo model when ready.
+ * /v1/users routes (admin/user management)
+ * Note: For most user operations, use /v1/auth routes instead
  */
 export async function userRoutes(app: FastifyInstance) {
-  // In-memory store (stub)
-  const users = new Map<string, { id: string; name: string; email: string }>();
-
-  // List users
-  app.get('/', async () => {
-    return { data: Array.from(users.values()) };
-  });
-
-  // Get user by ID
-  app.get<{ Params: { id: string } }>('/:id', async (request, reply) => {
-    const user = users.get(request.params.id);
-    if (!user) {
-      return reply.status(404).send({ statusCode: 404, error: 'Not Found', message: 'User not found' });
+  // List users (protected)
+  app.get(
+    '/',
+    {
+      onRequest: [requireAuth],
+    },
+    async () => {
+      const users = await User.find({}, { passwordHash: 0 }).sort({ createdAt: -1 });
+      return {
+        data: users.map((u) => ({
+          id: u._id.toString(),
+          name: u.name,
+          email: u.email,
+          createdAt: u.createdAt.toISOString(),
+        })),
+      };
     }
-    return { data: user };
-  });
+  );
 
-  // Create user
-  app.post('/', async (request, reply) => {
-    const body = createUserSchema.parse(request.body);
-    const id = crypto.randomUUID();
-    const user = { id, ...body };
-    users.set(id, user);
-    return reply.status(201).send({ data: user });
-  });
-
-  // Update user
-  app.patch<{ Params: { id: string } }>('/:id', async (request, reply) => {
-    const existing = users.get(request.params.id);
-    if (!existing) {
-      return reply.status(404).send({ statusCode: 404, error: 'Not Found', message: 'User not found' });
+  // Get user by ID (protected)
+  app.get<{ Params: { id: string } }>(
+    '/:id',
+    {
+      onRequest: [requireAuth],
+    },
+    async (request, reply) => {
+      const user = await User.findById(request.params.id, { passwordHash: 0 });
+      if (!user) {
+        return reply.status(404).send({ statusCode: 404, error: 'Not Found', message: 'User not found' });
+      }
+      return {
+        data: {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt.toISOString(),
+        },
+      };
     }
-    const body = updateUserSchema.parse(request.body);
-    const updated = { ...existing, ...body };
-    users.set(request.params.id, updated);
-    return { data: updated };
-  });
+  );
 
-  // Delete user
-  app.delete<{ Params: { id: string } }>('/:id', async (request, reply) => {
-    if (!users.has(request.params.id)) {
-      return reply.status(404).send({ statusCode: 404, error: 'Not Found', message: 'User not found' });
+  // Update user (protected - can only update self)
+  app.patch<{ Params: { id: string } }>(
+    '/:id',
+    {
+      onRequest: [requireAuth],
+    },
+    async (request, reply) => {
+      // Ensure user can only update themselves
+      if (request.params.id !== request.user.sub) {
+        return reply.status(403).send({
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'You can only update your own profile',
+        });
+      }
+
+      const body = updateUserSchema.parse(request.body);
+      const user = await User.findByIdAndUpdate(request.params.id, body, {
+        new: true,
+        select: { passwordHash: 0 },
+      });
+
+      if (!user) {
+        return reply.status(404).send({ statusCode: 404, error: 'Not Found', message: 'User not found' });
+      }
+
+      return {
+        data: {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt.toISOString(),
+        },
+      };
     }
-    users.delete(request.params.id);
-    return reply.status(204).send();
-  });
+  );
+
+  // Delete user (protected - can only delete self)
+  app.delete<{ Params: { id: string } }>(
+    '/:id',
+    {
+      onRequest: [requireAuth],
+    },
+    async (request, reply) => {
+      // Ensure user can only delete themselves
+      if (request.params.id !== request.user.sub) {
+        return reply.status(403).send({
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'You can only delete your own account',
+        });
+      }
+
+      const user = await User.findByIdAndDelete(request.params.id);
+      if (!user) {
+        return reply.status(404).send({ statusCode: 404, error: 'Not Found', message: 'User not found' });
+      }
+
+      return reply.status(204).send();
+    }
+  );
 }
+

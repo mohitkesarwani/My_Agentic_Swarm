@@ -7,6 +7,8 @@ export interface BuildRequest {
   title: string;
   description: string;
   applyToPlatform?: boolean;
+  userId?: string;
+  projectId?: string;
 }
 
 export interface PlanTask {
@@ -20,6 +22,8 @@ export interface Plan {
   requestId: string;
   title: string;
   tasks: PlanTask[];
+  userId?: string;
+  projectId?: string;
 }
 
 const REPO_ROOT = path.resolve(import.meta.dirname, '..', '..', '..');
@@ -64,11 +68,33 @@ export class Orchestrator {
       { id: `${requestId}-4`, description: 'Security review', owner: AgentRole.SECURITY, dependencies: [`${requestId}-2`, `${requestId}-3`] },
       { id: `${requestId}-5`, description: 'QA and testing', owner: AgentRole.QA, dependencies: [`${requestId}-2`, `${requestId}-3`] },
     ];
-    return { requestId, title: request.title, tasks };
+    return { 
+      requestId, 
+      title: request.title, 
+      tasks,
+      userId: request.userId,
+      projectId: request.projectId,
+    };
   }
 
   private async storePlan(plan: Plan): Promise<void> {
-    const dir = path.join(REPO_ROOT, 'knowledge-base', 'prompts', 'build-requests', plan.requestId);
+    // Use user/project scoped path if isolation context provided
+    let dir: string;
+    if (plan.userId && plan.projectId) {
+      dir = path.join(
+        REPO_ROOT,
+        'solutions',
+        'users',
+        plan.userId,
+        'projects',
+        plan.projectId,
+        'builds',
+        plan.requestId
+      );
+    } else {
+      // Legacy path for CLI mode
+      dir = path.join(REPO_ROOT, 'knowledge-base', 'prompts', 'build-requests', plan.requestId);
+    }
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(path.join(dir, 'plan.md'), this.planToMarkdown(plan), 'utf-8');
   }
@@ -106,6 +132,8 @@ export class Orchestrator {
   }
 
   private async createSolutionWorkspace(requestId: string, title: string): Promise<void> {
+    // Check if this is for a user/project (read from plan context if needed)
+    // For now, maintain backward compatibility with _staging
     const dir = path.join(REPO_ROOT, 'solutions', '_staging', requestId);
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(
