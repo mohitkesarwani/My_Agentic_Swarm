@@ -49,7 +49,9 @@ The Orchestrator (`tools/orchestrator`) accepts build requests and:
 1. Parses the request and generates a plan with tasks, owners, and dependencies
 2. Proposes architecture options and writes an ADR for the chosen approach
 3. Dispatches tasks to specialist agents (frontend, backend, security, etc.)
-4. Generates code into `solutions/_staging/<request-id>/`
+4. Generates code into:
+   - Multi-user mode (API/Web): `solutions/users/<userId>/projects/<projectId>/builds/<buildRequestId>/`
+   - Legacy CLI mode: `solutions/_staging/<request-id>/`
 5. Runs `scripts/verify.mjs` as a Definition of Done gate
 
 ### Specialist Agents
@@ -80,7 +82,11 @@ Located at `knowledge-base/`, it contains:
 
 ## Where Solutions Are Generated
 
-Solutions live in `solutions/_staging/<request-id>/` and are isolated from the pnpm workspace to avoid install conflicts. Solutions are only applied to `apps/` or `packages/` when a build request explicitly says "apply to platform".
+Solutions are generated in isolated directories to avoid workspace conflicts:
+- Multi-user mode: `solutions/users/<userId>/projects/<projectId>/builds/<buildRequestId>/`
+- Legacy CLI mode: `solutions/_staging/<request-id>/`
+
+Solutions are only applied to `apps/` or `packages/` when a build request explicitly says "apply to platform".
 
 ## Verification Commands
 
@@ -115,7 +121,7 @@ Starts: MongoDB 7, API server (port 3001), Web app (port 5173).
 - Zod input validation
 - PII redaction in logs
 - Request-ID correlation
-- OIDC/JWT-ready auth (placeholder)
+- Password-based auth with JWT (see ADR-002)
 - OWASP API Security Top 10 mapped in `docs/api/security-checklist.md`
 
 ## License

@@ -12,7 +12,7 @@
 
 | Threat | Category | Mitigation |
 |--------|----------|-----------|
-| Spoofed API requests | Spoofing | JWT/OIDC auth (placeholder), request validation |
+| Spoofed API requests | Spoofing | JWT auth with bcryptjs password hashing (ADR-002), request validation |
 | Tampered request bodies | Tampering | Zod schema validation on all inputs |
 | Unauthorized data access | Repudiation | Structured logging with request-id correlation |
 | Sensitive data exposure | Info Disclosure | PII redaction in logs, secure headers (Helmet) |

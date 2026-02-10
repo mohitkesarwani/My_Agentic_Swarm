@@ -7,8 +7,8 @@
 4. **Fail securely**: Errors must not weaken security posture
 
 ## Authentication & Authorization
-- OIDC/JWT for API authentication
-- PKCE for public clients
+- Password-based auth with JWT tokens (ADR-002)
+- In-memory token storage for SPA (no localStorage)
 - RBAC for authorization
 - No token storage in localStorage
 
