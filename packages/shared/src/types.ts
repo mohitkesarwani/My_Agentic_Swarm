@@ -64,3 +64,72 @@ export interface HealthResponse {
   timestamp: string;
   uptime: number;
 }
+
+/** Build status for project builds */
+export enum BuildStatus {
+  PENDING = 'pending',
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
+/** User profile */
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
+/** Build request within a project */
+export interface BuildRequest {
+  requestId: string;
+  prompt: string;
+  status: BuildStatus;
+  stagingPath?: string;
+  createdAt: string;
+  completedAt?: string;
+  error?: string;
+}
+
+/** Project */
+export interface Project {
+  id: string;
+  userId: string;
+  name: string;
+  description: string;
+  buildRequests: BuildRequest[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Auth response with JWT token */
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+/** Register request */
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+/** Login request */
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+/** Create project request */
+export interface CreateProjectRequest {
+  name: string;
+  description?: string;
+}
+
+/** Create build request */
+export interface CreateBuildRequest {
+  prompt: string;
+}
+

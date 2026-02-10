@@ -26,6 +26,15 @@ services:
       MONGODB_URI: mongodb://mongo:27017/agentic_swarm
       CORS_ORIGINS: "http://localhost:5173"
       LOG_LEVEL: info
+      JWT_SECRET: "${JWT_SECRET:-dev-secret-change-in-prod}"
+      JWT_ISSUER: agentic-swarm
+      JWT_AUDIENCE: agentic-swarm-api
+      JWT_EXPIRY: "7d"
+      BCRYPT_SALT_ROUNDS: "10"
+      GROQ_API_KEY: "${GROQ_API_KEY}"
+      ARCHITECT_MODEL: "${ARCHITECT_MODEL:-llama-3.3-70b-versatile}"
+    volumes:
+      - solutions-data:/app/solutions
     depends_on:
       mongo:
         condition: service_healthy
@@ -43,3 +52,4 @@ services:
 
 volumes:
   mongo-data:
+  solutions-data:

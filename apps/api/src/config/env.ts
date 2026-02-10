@@ -9,9 +9,13 @@ const envSchema = z.object({
   JWT_SECRET: z.string().default('change-me-in-production'),
   JWT_ISSUER: z.string().default('agentic-swarm'),
   JWT_AUDIENCE: z.string().default('agentic-swarm-api'),
+  JWT_EXPIRY: z.string().default('7d'),
+  BCRYPT_SALT_ROUNDS: z.coerce.number().default(10),
   RATE_LIMIT_MAX: z.coerce.number().default(100),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60_000),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  GROQ_API_KEY: z.string().optional(),
+  ARCHITECT_MODEL: z.string().default('llama-3.3-70b-versatile'),
 });
 
 export const env = envSchema.parse(process.env);
