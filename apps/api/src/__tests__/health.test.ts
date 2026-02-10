@@ -1,15 +1,23 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildApp } from '../app.js';
+import mongoose from 'mongoose';
+
+// Set NODE_ENV to 'test' for test database
+process.env.NODE_ENV = 'test';
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 
 beforeAll(async () => {
+  // Connect to database
+  await mongoose.connect('mongodb://localhost:27017/agentic_swarm_test');
+  
   app = await buildApp();
   await app.ready();
 });
 
 afterAll(async () => {
   await app.close();
+  await mongoose.disconnect();
 });
 
 describe('GET /health', () => {
