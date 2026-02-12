@@ -1,0 +1,5 @@
+{
+  "title": "Simple Blog API",
+  "description": "Create a REST API for a blog with posts and comments. Store data in MongoDB.",
+  "applyToPlatform": false
+}

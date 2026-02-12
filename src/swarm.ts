@@ -8,7 +8,10 @@ import { ArchitectAgent } from './agents/architect.js';
 import { FrontendAgent } from './agents/frontend.js';
 import { BackendAgent } from './agents/backend.js';
 import { QAAgent } from './agents/qa.js';
+import { SecurityAgent } from './agents/security.js';
+import { DataAgent } from './agents/data.js';
 import { RenderDeployTool } from './tools/render-deploy.js';
+import { ArtifactManager } from './tools/artifact-manager.js';
 import {
   AgentTask,
   AgentRole,
@@ -27,7 +30,10 @@ export class AgenticSwarm {
   private frontendAgent: FrontendAgent;
   private backendAgent: BackendAgent;
   private qaAgent: QAAgent;
+  private securityAgent: SecurityAgent;
+  private dataAgent: DataAgent;
   private deployTool?: RenderDeployTool;
+  private artifactManager: ArtifactManager;
   private workflowState?: WorkflowState;
 
   constructor(
@@ -42,11 +48,16 @@ export class AgenticSwarm {
       apiKey: config.groqApiKey,
     });
 
+    // Initialize artifact manager
+    this.artifactManager = new ArtifactManager(basePath, isolation);
+
     // Initialize all agents with isolation context
     this.architectAgent = new ArchitectAgent(llm);
     this.frontendAgent = new FrontendAgent(llm, basePath, isolation);
     this.backendAgent = new BackendAgent(llm, basePath, mongoUri, isolation);
     this.qaAgent = new QAAgent(llm, basePath, isolation);
+    this.securityAgent = new SecurityAgent(llm, basePath, isolation);
+    this.dataAgent = new DataAgent(llm, basePath, mongoUri, isolation);
 
     // Initialize deployment tool if configured
     if (deployConfig) {
@@ -71,6 +82,9 @@ export class AgenticSwarm {
     };
 
     try {
+      // Initialize artifact manager
+      await this.artifactManager.initialize();
+
       // Phase 1: Planning - Architect breaks down the prompt
       this.log('info', 'Phase 1: Planning with Architect Agent');
       this.workflowState.currentPhase = 'planning';
@@ -83,17 +97,24 @@ export class AgenticSwarm {
       this.workflowState.currentPhase = 'development';
       await this.executeTasks(tasks);
 
-      // Phase 3: Testing - QA validates the work
-      this.log('info', 'Phase 3: Testing with QA Agent');
+      // Phase 3: Security Review
+      this.log('info', 'Phase 3: Security Review with Security Agent');
       this.workflowState.currentPhase = 'testing';
+      await this.performSecurityReview(tasks);
+
+      // Phase 4: Testing - QA validates the work
+      this.log('info', 'Phase 4: Testing with QA Agent');
       await this.validateTasks(tasks);
 
-      // Phase 4: Deployment (optional)
+      // Phase 5: Deployment (optional)
       if (this.deployTool) {
-        this.log('info', 'Phase 4: Deployment');
+        this.log('info', 'Phase 5: Deployment');
         this.workflowState.currentPhase = 'deployment';
         await this.deployTool.deploy();
       }
+
+      // Export artifact manifest
+      await this.artifactManager.exportManifest();
 
       // Complete workflow
       this.workflowState.currentPhase = 'completed';
@@ -189,9 +210,32 @@ export class AgenticSwarm {
   }
 
   /**
+   * Perform security review on completed tasks
+   */
+  private async performSecurityReview(tasks: AgentTask[]): Promise<void> {
+    this.log('info', 'Performing security review on generated code');
+
+    const securityTask: AgentTask = {
+      id: 'security-review',
+      description: 'Perform comprehensive security audit on all generated code',
+      assignedTo: AgentRole.SECURITY,
+      status: TaskStatus.PENDING,
+    };
+
+    const response = await this.securityAgent.executeTask(securityTask);
+
+    if (!response.success) {
+      this.log('error', 'Security review failed - deployment blocked');
+      throw new Error('Security review failed: ' + response.error);
+    } else {
+      this.log('info', 'Security review passed');
+    }
+  }
+
+  /**
    * Get agent for specific role
    */
-  private getAgentForRole(role: AgentRole): FrontendAgent | BackendAgent | QAAgent {
+  private getAgentForRole(role: AgentRole): FrontendAgent | BackendAgent | QAAgent | SecurityAgent | DataAgent {
     switch (role) {
       case AgentRole.FRONTEND:
         return this.frontendAgent;
@@ -199,6 +243,10 @@ export class AgenticSwarm {
         return this.backendAgent;
       case AgentRole.QA:
         return this.qaAgent;
+      case AgentRole.SECURITY:
+        return this.securityAgent;
+      case AgentRole.DATA:
+        return this.dataAgent;
       default:
         throw new Error(`Unknown agent role: ${role}`);
     }
@@ -272,5 +320,12 @@ export class AgenticSwarm {
    */
   getWorkflowState(): WorkflowState | undefined {
     return this.workflowState;
+  }
+
+  /**
+   * Get artifact manager
+   */
+  getArtifactManager(): ArtifactManager {
+    return this.artifactManager;
   }
 }

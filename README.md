@@ -51,19 +51,32 @@ pnpm dev
 
 ## How the Orchestrator Works
 
-The Orchestrator (`tools/orchestrator`) accepts build requests and:
+The Orchestrator (`tools/orchestrator`) accepts build requests and coordinates specialist agents. It now supports two modes:
 
+### Basic Mode (Legacy)
 1. Parses the request and generates a plan with tasks, owners, and dependencies
 2. Proposes architecture options and writes an ADR for the chosen approach
-3. Dispatches tasks to specialist agents (frontend, backend, security, etc.)
-4. Generates code into:
-   - Multi-user mode (API/Web): `solutions/users/<userId>/projects/<projectId>/builds/<buildRequestId>/`
-   - Legacy CLI mode: `solutions/_staging/<request-id>/`
-5. Runs `scripts/verify.mjs` as a Definition of Done gate
+3. Creates solution workspace structure
+4. Logs task assignments (agents not invoked)
+
+### Enhanced Mode (New) 🆕
+1. **Natural Language Parsing** - Automatically identifies frontend, backend, database, security, and QA requirements
+2. **Agent Coordination** - Dispatches tasks to appropriate specialist agents
+3. **Dependency Management** - Executes tasks in topological order respecting dependencies
+4. **Artifact Handoffs** - Agents share schemas, interfaces, and contracts through structured artifacts
+5. **Security & QA Gates** - Code must pass security review and QA validation before promotion
+6. **Workspace Isolation** - Each build gets isolated workspace with artifact tracking
+
+Run enhanced mode with:
+```bash
+node tools/orchestrator/src/index.js <build-request.json> --enhanced
+```
+
+See [Orchestrator Guide](./docs/orchestrator-guide.md) and [Agent Workflow](./docs/agent-workflow.md) for details.
 
 ### Specialist Agents
 
-**Core**: Frontend, Backend, Infra, Security, Data, QA
+**Core**: Frontend, Backend, Data, Security, QA, Infra
 
 **Blockchain/DeFi**: DeFi Product, Smart Contract Engineer, Smart Contract Security, Fuzzing & Invariant Testing, Protocol Risk, Wallet & Key Management, On-chain Off-chain Integration, Oracle & Data Integrity, Compliance & Monitoring
 

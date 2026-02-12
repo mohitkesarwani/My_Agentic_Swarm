@@ -165,4 +165,79 @@ Provide only the endpoint code, no explanations.`;
   getAgent(): ReActAgent {
     return this.agent;
   }
+
+  /**
+   * Export API contract for frontend consumption
+   * Generates a JSON contract describing all endpoints, request/response types
+   */
+  async exportApiContract(workspacePath: string): Promise<AgentResponse> {
+    const contractPrompt = `Read all the backend route files from the workspace and create an api-contract.json file.
+
+The contract should include:
+- List of all API endpoints with methods (GET, POST, PUT, DELETE)
+- Request body schemas for each endpoint
+- Response schemas for each endpoint
+- TypeScript interfaces for all data types
+- Authentication requirements
+- Error response formats
+
+Example format:
+{
+  "baseUrl": "/api",
+  "endpoints": [
+    {
+      "path": "/users",
+      "method": "GET",
+      "description": "Get all users",
+      "auth": true,
+      "response": "User[]"
+    },
+    {
+      "path": "/users",
+      "method": "POST",
+      "description": "Create a user",
+      "auth": true,
+      "requestBody": "CreateUserDto",
+      "response": "User"
+    }
+  ],
+  "types": {
+    "User": {
+      "id": "string",
+      "email": "string",
+      "name": "string"
+    },
+    "CreateUserDto": {
+      "email": "string",
+      "name": "string",
+      "password": "string"
+    }
+  }
+}
+
+Save this to 'api-contract.json' in the backend workspace using the filesystem tool.`;
+
+    try {
+      const response = await this.agent.run(
+        { prompt: contractPrompt },
+        {
+          execution: {
+            maxIterations: 10,
+          },
+        }
+      );
+
+      return {
+        success: true,
+        message: 'API contract exported successfully',
+        data: response.result.text,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to export API contract',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 }

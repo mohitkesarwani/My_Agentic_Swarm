@@ -133,3 +133,50 @@ export interface CreateBuildRequest {
   prompt: string;
 }
 
+/** Agent communication contract - defines inputs/outputs for agent handoffs */
+export interface AgentContract {
+  agentRole: AgentRole;
+  inputSchema?: Record<string, any>;
+  outputSchema?: Record<string, any>;
+  artifacts?: ArtifactDefinition[];
+}
+
+/** Artifact definition for agent outputs */
+export interface ArtifactDefinition {
+  type: 'schema' | 'interface' | 'endpoint' | 'component' | 'test' | 'documentation';
+  name: string;
+  path: string;
+  content?: string;
+  metadata?: Record<string, any>;
+}
+
+/** Agent handoff data - shared between agents */
+export interface AgentHandoff {
+  fromAgent: AgentRole;
+  toAgent: AgentRole;
+  taskId: string;
+  artifacts: ArtifactDefinition[];
+  message?: string;
+  timestamp: string;
+}
+
+/** Requirement module - parsed from user requirements */
+export interface RequirementModule {
+  id: string;
+  title: string;
+  description: string;
+  type: 'frontend' | 'backend' | 'database' | 'security' | 'infrastructure';
+  priority: 'high' | 'medium' | 'low';
+  dependencies: string[];
+  acceptanceCriteria?: string[];
+}
+
+/** Agent execution context with shared artifacts */
+export interface AgentExecutionContext {
+  taskId: string;
+  agentRole: AgentRole;
+  artifacts: Map<string, ArtifactDefinition>;
+  handoffs: AgentHandoff[];
+  sharedWorkspacePath: string;
+}
+

@@ -19,6 +19,8 @@ export enum AgentRole {
   FRONTEND = 'frontend',
   BACKEND = 'backend',
   QA = 'qa',
+  SECURITY = 'security',
+  DATA = 'data',
 }
 
 /**
