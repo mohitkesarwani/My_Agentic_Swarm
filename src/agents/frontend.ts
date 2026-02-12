@@ -139,4 +139,69 @@ Provide only the component code, no explanations.`;
   getAgent(): ReActAgent {
     return this.agent;
   }
+
+  /**
+   * Generate API client hooks from backend contract
+   * Consumes API contract and generates typed React hooks
+   */
+  async generateApiClient(apiContractPath: string): Promise<AgentResponse> {
+    const clientPrompt = `Read the API contract from ${apiContractPath} and generate React hooks for all endpoints.
+
+For each endpoint, create a custom hook that:
+- Uses fetch or axios to call the endpoint
+- Has proper TypeScript types from the contract
+- Includes loading, error, and data states
+- Handles authentication if required
+- Provides good error messages
+
+Example output structure:
+// hooks/useUsers.ts
+export const useGetUsers = () => {
+  const [data, setData] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/users', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const users = await response.json();
+      setData(users);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return { data, loading, error, refetch: fetchUsers };
+};
+
+Save all hooks to 'hooks/' directory using the filesystem tool.`;
+
+    try {
+      const response = await this.agent.run(
+        { prompt: clientPrompt },
+        {
+          execution: {
+            maxIterations: 10,
+          },
+        }
+      );
+
+      return {
+        success: true,
+        message: 'API client hooks generated successfully',
+        data: response.result.text,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to generate API client',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 }

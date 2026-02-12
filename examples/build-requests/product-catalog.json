@@ -1,0 +1,5 @@
+{
+  "title": "E-commerce Product Catalog",
+  "description": "Build a product catalog interface with React showing products from an API, with search and filtering capabilities. The backend should provide REST endpoints for products with MongoDB storage.",
+  "applyToPlatform": false
+}

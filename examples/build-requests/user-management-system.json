@@ -1,0 +1,5 @@
+{
+  "title": "User Management System",
+  "description": "Build a complete user management system with a REST API for CRUD operations, MongoDB database for storing user data including email, name, and role, and a React dashboard for managing users with authentication. The system should be secure with proper input validation and include automated tests.",
+  "applyToPlatform": false
+}

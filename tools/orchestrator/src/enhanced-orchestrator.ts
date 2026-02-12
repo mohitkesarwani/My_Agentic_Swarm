@@ -6,8 +6,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { AgentRole, AgentTask, TaskStatus, IsolationContext } from '@agentic-swarm/shared';
-import { RequirementParser, ParsedRequirement, RequirementModule } from './requirement-parser.js';
+import { AgentTask, TaskStatus } from '@agentic-swarm/shared';
+import { RequirementParser, ParsedRequirement } from './requirement-parser.js';
 
 export interface BuildRequest {
   title: string;
