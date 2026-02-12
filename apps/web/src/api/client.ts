@@ -1,10 +1,13 @@
 const BASE_URL = '/api';
 
 export async function apiClient<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = localStorage.getItem('auth_token');
+  
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
   });

@@ -81,6 +81,16 @@ export interface User {
   createdAt: string;
 }
 
+/** Agent activity log entry */
+export interface AgentActivity {
+  timestamp: string;
+  agentRole: AgentRole;
+  taskId: string;
+  action: string;
+  status: 'started' | 'progress' | 'completed' | 'failed';
+  details?: string;
+}
+
 /** Build request within a project */
 export interface BuildRequest {
   requestId: string;
@@ -90,6 +100,10 @@ export interface BuildRequest {
   createdAt: string;
   completedAt?: string;
   error?: string;
+  agentActivities?: AgentActivity[];
+  artifacts?: ArtifactDefinition[];
+  handoffs?: AgentHandoff[];
+  logs?: string[];
 }
 
 /** Project */
@@ -131,6 +145,19 @@ export interface CreateProjectRequest {
 /** Create build request */
 export interface CreateBuildRequest {
   prompt: string;
+}
+
+/** Build logs response */
+export interface BuildLogsResponse {
+  requestId: string;
+  logs: string[];
+  agentActivities: AgentActivity[];
+}
+
+/** Build artifacts response */
+export interface BuildArtifactsResponse {
+  requestId: string;
+  artifacts: ArtifactDefinition[];
 }
 
 /** Agent communication contract - defines inputs/outputs for agent handoffs */
