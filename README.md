@@ -2,6 +2,46 @@
 
 Enterprise-grade monorepo for an agent-driven build system. An Orchestrator coordinates specialist agents (frontend, backend, infra, security, data, blockchain/DeFi) to process build requests, generate solutions, and maintain platform quality.
 
+## 🚀 Quick Start
+
+**New to the platform?** Get started in under 5 minutes:
+
+1. Read [QUICKSTART.md](./QUICKSTART.md) for rapid setup
+2. See [SYSTEM_GUIDE.md](./docs/SYSTEM_GUIDE.md) for comprehensive documentation
+3. Check [ONBOARDING.md](./ONBOARDING.md) for detailed step-by-step guide
+
+```bash
+# Quick setup
+pnpm install
+cp .env.example .env
+# Edit .env and set GROQ_API_KEY
+
+# Start services
+docker run -d -p 27017:27017 mongo:7  # Terminal 1
+cd apps/api && pnpm dev              # Terminal 2
+cd apps/web && pnpm dev              # Terminal 3
+
+# Open http://localhost:5173 and start building!
+```
+
+## ✨ What's New - POC System
+
+The platform now includes a **complete proof-of-concept** environment where you can:
+
+- ✅ **Register and Login** - Web-based authentication with JWT
+- ✅ **Create Projects** - Organize your builds
+- ✅ **Submit Requirements** - Natural language build requests
+- ✅ **Track Builds** - Real-time agent activity monitoring
+- ✅ **View Details** - Logs, artifacts, and handoff data
+- ✅ **Iterate** - Submit incremental feature requests
+
+**Try it now:**
+1. Open `http://localhost:5173`
+2. Register an account
+3. Create a project
+4. Submit: "Build me a blog app with user accounts and comments"
+5. Watch the agents work!
+
 ## Architecture
 
 ```
@@ -66,11 +106,14 @@ The Orchestrator (`tools/orchestrator`) accepts build requests and coordinates s
 4. **Artifact Handoffs** - Agents share schemas, interfaces, and contracts through structured artifacts
 5. **Security & QA Gates** - Code must pass security review and QA validation before promotion
 6. **Workspace Isolation** - Each build gets isolated workspace with artifact tracking
+7. **Real-Time Tracking** - All agent activities logged and tracked in MongoDB
 
 Run enhanced mode with:
 ```bash
 node tools/orchestrator/src/index.js <build-request.json> --enhanced
 ```
+
+Or submit via the web UI for automatic orchestration!
 
 See [Orchestrator Guide](./docs/orchestrator-guide.md) and [Agent Workflow](./docs/agent-workflow.md) for details.
 
@@ -103,10 +146,31 @@ Located at `knowledge-base/`, it contains:
 ## Where Solutions Are Generated
 
 Solutions are generated in isolated directories to avoid workspace conflicts:
-- Multi-user mode: `solutions/users/<userId>/projects/<projectId>/builds/<buildRequestId>/`
+- **Multi-user mode (POC)**: `solutions/users/<userId>/projects/<projectId>/builds/<buildRequestId>/`
 - Legacy CLI mode: `solutions/_staging/<request-id>/`
 
 Solutions are only applied to `apps/` or `packages/` when a build request explicitly says "apply to platform".
+
+## API Endpoints
+
+The platform provides a comprehensive REST API:
+
+### Authentication
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - Login and get JWT token
+- `GET /api/v1/auth/me` - Get current user profile
+
+### Projects
+- `GET /api/v1/projects` - List all projects (requires auth)
+- `POST /api/v1/projects` - Create new project (requires auth)
+- `GET /api/v1/projects/:id` - Get project details (requires auth)
+- `DELETE /api/v1/projects/:id` - Delete project (requires auth)
+
+### Builds
+- `POST /api/v1/projects/:projectId/build` - Submit build request (requires auth)
+- `GET /api/v1/projects/:projectId/builds/:buildId` - Get build details (requires auth)
+
+All endpoints return JSON and follow standard HTTP status codes. See [SYSTEM_GUIDE.md](./docs/SYSTEM_GUIDE.md) for full API documentation.
 
 ## Verification Commands
 
