@@ -24,23 +24,34 @@ cd apps/web && pnpm dev              # Terminal 3
 # Open http://localhost:5173 and start building!
 ```
 
-## ✨ What's New - POC System
+## ✨ What's New - Enhanced POC System
 
 The platform now includes a **complete proof-of-concept** environment where you can:
 
+- ✅ **Dashboard** - Overview of all projects, builds, and statistics
 - ✅ **Register and Login** - Web-based authentication with JWT
 - ✅ **Create Projects** - Organize your builds
 - ✅ **Submit Requirements** - Natural language build requests
-- ✅ **Track Builds** - Real-time agent activity monitoring
+- ✅ **Track Builds** - Real-time agent activity monitoring with polling
+- ✅ **View Artifacts** - Browse generated files and code
+- ✅ **Preview Builds** - Create preview environments for generated apps
 - ✅ **View Details** - Logs, artifacts, and handoff data
 - ✅ **Iterate** - Submit incremental feature requests
+
+**New Features:**
+- 📊 **Dashboard Screen** - Statistics and recent builds at a glance
+- 🔍 **Artifact Viewer** - Browse all generated files by type
+- 🚀 **Preview System** - Foundation for deploying generated apps
+- 📚 **Comprehensive Documentation** - API docs and feature guides
 
 **Try it now:**
 1. Open `http://localhost:5173`
 2. Register an account
-3. Create a project
-4. Submit: "Build me a blog app with user accounts and comments"
-5. Watch the agents work!
+3. View the dashboard
+4. Create a project
+5. Submit: "Build me a blog app with user accounts and comments"
+6. Watch the agents work!
+7. View artifacts and create a preview
 
 ## Architecture
 
@@ -170,7 +181,13 @@ The platform provides a comprehensive REST API:
 - `POST /api/v1/projects/:projectId/build` - Submit build request (requires auth)
 - `GET /api/v1/projects/:projectId/builds/:buildId` - Get build details (requires auth)
 
-All endpoints return JSON and follow standard HTTP status codes. See [SYSTEM_GUIDE.md](./docs/SYSTEM_GUIDE.md) for full API documentation.
+### Preview & Artifacts (New!)
+- `GET /api/v1/projects/:projectId/builds/:buildId/preview` - Get preview status
+- `POST /api/v1/projects/:projectId/builds/:buildId/preview` - Create preview environment
+- `GET /api/v1/projects/:projectId/builds/:buildId/artifacts` - List generated artifacts
+- `DELETE /api/v1/projects/:projectId/builds/:buildId/preview/:previewId` - Stop preview
+
+All endpoints return JSON and follow standard HTTP status codes. See [Complete Feature Documentation](./docs/FEATURES.md) and [Preview API Documentation](./docs/api/preview-api.md) for details.
 
 ## Verification Commands
 
