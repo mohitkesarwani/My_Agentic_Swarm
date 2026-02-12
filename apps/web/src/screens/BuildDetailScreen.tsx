@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../api/client.js';
-import type { BuildRequest, AgentActivity } from '@agentic-swarm/shared';
+import type { BuildRequest, AgentActivity, PreviewEnvironment } from '@agentic-swarm/shared';
 
 export function BuildDetailScreen() {
   const { projectId, buildId } = useParams<{ projectId: string; buildId: string }>();
@@ -9,14 +9,19 @@ export function BuildDetailScreen() {
   const [build, setBuild] = useState<BuildRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'agents'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'agents' | 'artifacts'>('overview');
+  const [preview, setPreview] = useState<PreviewEnvironment | null>(null);
+  const [artifacts, setArtifacts] = useState<any[]>([]);
+  const [loadingPreview, setLoadingPreview] = useState(false);
 
   useEffect(() => {
     loadBuild();
+    loadPreview();
     // Poll for updates every 3 seconds while build is running
     const interval = setInterval(() => {
       if (build?.status === 'running' || build?.status === 'pending') {
         loadBuild();
+        loadPreview();
       }
     }, 3000);
     return () => clearInterval(interval);
@@ -33,6 +38,46 @@ export function BuildDetailScreen() {
       setLoading(false);
     }
   };
+
+  const loadPreview = async () => {
+    try {
+      const response = await apiClient<{ data: PreviewEnvironment }>(`/v1/projects/${projectId}/builds/${buildId}/preview`);
+      setPreview(response.data);
+    } catch {
+      // Preview might not exist yet
+      setPreview(null);
+    }
+  };
+
+  const loadArtifacts = async () => {
+    try {
+      const response = await apiClient<{ data: { artifacts: any[] } }>(`/v1/projects/${projectId}/builds/${buildId}/artifacts`);
+      setArtifacts(response.data.artifacts);
+    } catch {
+      setArtifacts([]);
+    }
+  };
+
+  const handleCreatePreview = async () => {
+    setLoadingPreview(true);
+    try {
+      const response = await apiClient<{ data: PreviewEnvironment }>(
+        `/v1/projects/${projectId}/builds/${buildId}/preview`,
+        { method: 'POST' }
+      );
+      setPreview(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create preview');
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'artifacts') {
+      loadArtifacts();
+    }
+  }, [activeTab]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -151,7 +196,7 @@ export function BuildDetailScreen() {
       {/* Tabs */}
       <div style={{ borderBottom: '2px solid #ddd', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          {['overview', 'logs', 'agents'].map((tab) => (
+          {['overview', 'logs', 'agents', 'artifacts'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
@@ -334,6 +379,154 @@ export function BuildDetailScreen() {
               <p>No agent activities recorded yet</p>
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'artifacts' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ margin: 0 }}>Build Artifacts & Preview</h3>
+            {build.status === 'completed' && (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {!preview && (
+                  <button
+                    onClick={handleCreatePreview}
+                    disabled={loadingPreview}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      backgroundColor: loadingPreview ? '#ccc' : '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: loadingPreview ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {loadingPreview ? 'Creating...' : '🚀 Create Preview'}
+                  </button>
+                )}
+                {preview && preview.status === 'running' && (
+                  <div style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: '#d4edda',
+                    border: '1px solid #c3e6cb',
+                    borderRadius: '4px',
+                    color: '#155724',
+                  }}>
+                    ✅ Preview Available
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {preview && (
+            <div style={{
+              padding: '1.5rem',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              backgroundColor: '#f8f9fa',
+              marginBottom: '1.5rem',
+            }}>
+              <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>Preview Environment</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: '0.875rem', color: '#666' }}>Status</p>
+                  <p style={{ margin: 0, marginTop: '0.25rem', fontWeight: 600 }}>
+                    {preview.status}
+                  </p>
+                </div>
+                {preview.startedAt && (
+                  <div>
+                    <p style={{ margin: 0, fontSize: '0.875rem', color: '#666' }}>Started At</p>
+                    <p style={{ margin: 0, marginTop: '0.25rem', fontWeight: 600 }}>
+                      {new Date(preview.startedAt).toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                {preview.url && (
+                  <div>
+                    <p style={{ margin: 0, fontSize: '0.875rem', color: '#666' }}>Artifacts URL</p>
+                    <p style={{ margin: 0, marginTop: '0.25rem', fontWeight: 600, fontSize: '0.875rem', wordBreak: 'break-all' }}>
+                      {preview.url}
+                    </p>
+                  </div>
+                )}
+              </div>
+              {preview.error && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '0.75rem',
+                  backgroundColor: '#fee',
+                  border: '1px solid #fcc',
+                  borderRadius: '4px',
+                  color: '#c00',
+                }}>
+                  {preview.error}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div>
+            <h4 style={{ marginBottom: '1rem' }}>Generated Artifacts</h4>
+            {artifacts.length > 0 ? (
+              <div style={{
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                overflow: 'hidden',
+              }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f8f9fa' }}>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #ddd' }}>
+                        File Name
+                      </th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #ddd' }}>
+                        Path
+                      </th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #ddd' }}>
+                        Type
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {artifacts.map((artifact, index) => (
+                      <tr key={index} style={{ borderBottom: index < artifacts.length - 1 ? '1px solid #eee' : 'none' }}>
+                        <td style={{ padding: '0.75rem' }}>
+                          <code style={{ fontSize: '0.875rem' }}>{artifact.name}</code>
+                        </td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.875rem', color: '#666' }}>
+                          {artifact.path}
+                        </td>
+                        <td style={{ padding: '0.75rem' }}>
+                          <span style={{
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: '8px',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            backgroundColor: '#e3f2fd',
+                            color: '#1976d2',
+                          }}>
+                            {artifact.type}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div style={{
+                padding: '3rem',
+                textAlign: 'center',
+                border: '2px dashed #ddd',
+                borderRadius: '8px',
+                color: '#666',
+              }}>
+                <p>No artifacts available. They will appear here after the build completes.</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
