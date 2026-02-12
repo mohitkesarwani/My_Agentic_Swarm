@@ -2,6 +2,8 @@
 
 Welcome to the Agentic Swarm platform! This guide will walk you through setting up your local environment, registering your first user, and submitting your first build request.
 
+> **💡 Quick Tip**: We provide convenient bash scripts in the `examples/` directory to automate common operations. See [examples/README.md](./examples/README.md) for quick-start scripts.
+
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
@@ -171,6 +173,18 @@ curl http://localhost:3001/health
 
 > **Note**: The Web UI currently only has a health check screen. Registration is done via API. A registration UI will be added in the future.
 
+### Option A: Using the Example Script (Recommended)
+
+We provide a convenient script for registration:
+
+```bash
+./examples/register-user.sh "John Doe" "john@example.com" "SecurePass123!"
+```
+
+This script handles validation, makes the API call, and saves your token automatically.
+
+### Option B: Manual Registration via curl
+
 Register a new user account using the API:
 
 ```bash
@@ -228,6 +242,16 @@ db.users.find().pretty()
 
 ## Step 5: Login and Obtain JWT Token
 
+### Option A: Using the Example Script (Recommended)
+
+```bash
+./examples/login-user.sh "john@example.com" "SecurePass123!"
+```
+
+The script automatically saves your token to `token.txt` for use in subsequent commands.
+
+### Option B: Manual Login via curl
+
 Login with your credentials to get a fresh JWT token:
 
 ```bash
@@ -283,6 +307,16 @@ curl http://localhost:3001/v1/auth/me \
 
 Before submitting build requests, you need to create a project:
 
+### Option A: Using the Example Script (Recommended)
+
+```bash
+./examples/create-project.sh "$(cat token.txt)" "My First Project" "Testing the Agentic Swarm platform"
+```
+
+The script automatically saves your project ID to `project-id.txt`.
+
+### Option B: Manual Project Creation via curl
+
 ```bash
 curl -X POST http://localhost:3001/v1/projects \
   -H "Content-Type: application/json" \
@@ -327,6 +361,17 @@ curl http://localhost:3001/v1/projects \
 
 Now you can submit a build request to the orchestrator:
 
+### Option A: Using the Example Script (Recommended)
+
+```bash
+./examples/submit-build.sh "$(cat token.txt)" "$(cat project-id.txt)" \
+  "Create a simple todo list API with endpoints for creating, listing, updating, and deleting todos. Use TypeScript and include input validation."
+```
+
+The script automatically saves your build request ID to `build-id.txt`.
+
+### Option B: Manual Build Submission via curl
+
 ```bash
 curl -X POST http://localhost:3001/v1/projects/$PROJECT_ID/build \
   -H "Content-Type: application/json" \
@@ -363,6 +408,16 @@ curl -X POST http://localhost:3001/v1/projects/$PROJECT_ID/build \
 ## Step 8: Check Build Status
 
 Monitor your build request status:
+
+### Option A: Using the Example Script (Recommended)
+
+```bash
+./examples/check-build-status.sh "$(cat token.txt)" "$(cat project-id.txt)" "$(cat build-id.txt)"
+```
+
+The script provides color-coded status output and shows staging path when completed.
+
+### Option B: Manual Status Check via curl
 
 ```bash
 # Save the build ID from the response
@@ -425,6 +480,38 @@ curl http://localhost:3001/v1/projects/$PROJECT_ID \
 
 # This shows the project with all its build requests
 ```
+
+---
+
+## Quick Start with Example Scripts
+
+For a streamlined onboarding experience, you can use our example scripts to complete the entire flow:
+
+```bash
+# Start services
+docker compose -f infrastructure/docker/docker-compose.yml up -d
+
+# Wait for services to be ready
+sleep 10
+
+# Register a new user
+./examples/register-user.sh "John Doe" "john@example.com" "SecurePass123!"
+
+# Login (saves token to token.txt)
+./examples/login-user.sh "john@example.com" "SecurePass123!"
+
+# Create a project (saves project ID to project-id.txt)
+./examples/create-project.sh "$(cat token.txt)" "My First Project" "Testing the platform"
+
+# Submit a build request (saves build ID to build-id.txt)
+./examples/submit-build.sh "$(cat token.txt)" "$(cat project-id.txt)" \
+  "Create a simple REST API for managing todos with CRUD operations"
+
+# Check build status
+./examples/check-build-status.sh "$(cat token.txt)" "$(cat project-id.txt)" "$(cat build-id.txt)"
+```
+
+See [examples/README.md](./examples/README.md) for detailed documentation on all available scripts.
 
 ---
 
