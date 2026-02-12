@@ -41,3 +41,8 @@ coverage/
 tmp/
 temp/
 *.tmp
+
+# Example script outputs (local development only)
+token.txt
+project-id.txt
+build-id.txt
