@@ -4,89 +4,13 @@ import crypto from 'crypto';
 import { Project, BuildStatus } from '../../models/project.model.js';
 import { requireAuth } from '../../middleware/auth.js';
 import { env } from '../../config/env.js';
+import { executeBuild as executeBuildService } from '../../services/build-executor.service.js';
 import type { CreateBuildRequest } from '@agentic-swarm/shared';
 
 // Validation schema
 const createBuildSchema = z.object({
   prompt: z.string().min(1).max(2000),
 });
-
-/**
- * Execute swarm build in background
- * This is a placeholder - actual implementation will spawn swarm process
- */
-async function executeBuild(
-  projectId: string,
-  userId: string,
-  buildRequestId: string,
-  prompt: string
-): Promise<void> {
-  // TODO: Implement actual swarm execution
-  // For now, this is a stub that simulates build completion
-  // Real implementation will spawn a child process or call the swarm module
-
-  console.log(`[Build ${buildRequestId}] Starting build for project ${projectId}`);
-  console.log(`[Build ${buildRequestId}] User: ${userId}, Prompt: ${prompt}`);
-
-  // Update to running
-  await Project.updateOne(
-    {
-      _id: projectId,
-      'buildRequests.requestId': buildRequestId,
-    },
-    {
-      $set: {
-        'buildRequests.$.status': BuildStatus.RUNNING,
-      },
-    }
-  );
-
-  try {
-    // Simulate build work (remove this in real implementation)
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-
-    // In real implementation, this would:
-    // 1. Import/spawn AgenticSwarm with isolation context
-    // 2. Execute the prompt
-    // 3. Monitor progress
-
-    const stagingPath = `solutions/users/${userId}/projects/${projectId}/builds/${buildRequestId}`;
-
-    // Mark as completed
-    await Project.updateOne(
-      {
-        _id: projectId,
-        'buildRequests.requestId': buildRequestId,
-      },
-      {
-        $set: {
-          'buildRequests.$.status': BuildStatus.COMPLETED,
-          'buildRequests.$.completedAt': new Date(),
-          'buildRequests.$.stagingPath': stagingPath,
-        },
-      }
-    );
-
-    console.log(`[Build ${buildRequestId}] Completed successfully`);
-  } catch (error) {
-    // Mark as failed
-    await Project.updateOne(
-      {
-        _id: projectId,
-        'buildRequests.requestId': buildRequestId,
-      },
-      {
-        $set: {
-          'buildRequests.$.status': BuildStatus.FAILED,
-          'buildRequests.$.completedAt': new Date(),
-          'buildRequests.$.error': error instanceof Error ? error.message : 'Unknown error occurred',
-        },
-      }
-    );
-
-    console.error(`[Build ${buildRequestId}] Failed:`, error);
-  }
-}
 
 export async function buildRoutes(app: FastifyInstance) {
   /**
@@ -149,7 +73,12 @@ export async function buildRoutes(app: FastifyInstance) {
 
         // Launch build in background (non-blocking)
         setImmediate(() => {
-          executeBuild(projectId, userId, buildRequestId, data.prompt).catch((err) => {
+          executeBuildService({
+            projectId,
+            userId,
+            buildRequestId,
+            prompt: data.prompt,
+          }).catch((err) => {
             console.error(`[Build ${buildRequestId}] Execution error:`, err);
           });
         });
@@ -216,6 +145,24 @@ export async function buildRoutes(app: FastifyInstance) {
           createdAt: build.createdAt.toISOString(),
           completedAt: build.completedAt?.toISOString(),
           error: build.error,
+          agentActivities: build.agentActivities?.map((a) => ({
+            timestamp: a.timestamp.toISOString(),
+            agentRole: a.agentRole as any,
+            taskId: a.taskId,
+            action: a.action,
+            status: a.status,
+            details: a.details,
+          })),
+          artifacts: build.artifacts,
+          handoffs: build.handoffs?.map((h) => ({
+            fromAgent: h.fromAgent as any,
+            toAgent: h.toAgent as any,
+            taskId: h.taskId,
+            artifacts: h.artifacts,
+            message: h.message,
+            timestamp: h.timestamp.toISOString(),
+          })),
+          logs: build.logs,
         },
       });
     }
