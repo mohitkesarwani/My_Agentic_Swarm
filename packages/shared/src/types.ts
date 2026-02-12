@@ -207,3 +207,36 @@ export interface AgentExecutionContext {
   sharedWorkspacePath: string;
 }
 
+/** Preview environment status */
+export enum PreviewStatus {
+  PENDING = 'pending',
+  BUILDING = 'building',
+  RUNNING = 'running',
+  STOPPED = 'stopped',
+  FAILED = 'failed',
+}
+
+/** Preview environment for a build */
+export interface PreviewEnvironment {
+  id: string;
+  buildRequestId: string;
+  projectId: string;
+  status: PreviewStatus;
+  url?: string;
+  containerName?: string;
+  port?: number;
+  createdAt: string;
+  startedAt?: string;
+  stoppedAt?: string;
+  error?: string;
+}
+
+/** Deployment configuration */
+export interface DeploymentConfig {
+  environment: 'preview' | 'staging' | 'production';
+  buildRequestId: string;
+  autoScale?: boolean;
+  replicas?: number;
+  customDomain?: string;
+}
+

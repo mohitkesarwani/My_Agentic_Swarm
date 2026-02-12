@@ -17,7 +17,7 @@ export function LoginScreen() {
 
     try {
       await login({ email, password });
-      navigate('/projects');
+      navigate('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

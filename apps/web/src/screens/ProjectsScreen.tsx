@@ -77,19 +77,34 @@ export function ProjectsScreen() {
             Welcome, {user?.name}
           </p>
         </div>
-        <button
-          onClick={logout}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          Logout
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            ← Dashboard
+          </button>
+          <button
+            onClick={logout}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {error && (
