@@ -74,7 +74,7 @@ export class ArtifactManager {
   async publishArtifact(artifact: Omit<Artifact, 'id' | 'timestamp'>): Promise<Artifact> {
     const fullArtifact: Artifact = {
       ...artifact,
-      id: `${artifact.producedBy}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `${artifact.producedBy}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       timestamp: new Date(),
     };
 

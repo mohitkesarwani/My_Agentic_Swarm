@@ -47,20 +47,6 @@ export class RequirementParser {
       });
     }
 
-    // Detect if requirement mentions API/backend
-    if (this.mentionsBackend(requirement)) {
-      modules.push({
-        id: `mod-${moduleIdCounter++}`,
-        title: 'Backend API',
-        description: this.extractBackendRequirements(requirement),
-        type: 'backend',
-        assignedAgent: AgentRole.BACKEND,
-        priority: 'high',
-        dependencies: [],
-        acceptanceCriteria: this.extractAcceptanceCriteria(requirement, 'backend'),
-      });
-    }
-
     // Detect if requirement mentions database/data
     if (this.mentionsDatabase(requirement)) {
       const dbModule: RequirementModule = {
@@ -73,14 +59,29 @@ export class RequirementParser {
         dependencies: [],
         acceptanceCriteria: this.extractAcceptanceCriteria(requirement, 'database'),
       };
+      modules.push(dbModule);
+    }
+
+    // Detect if requirement mentions API/backend
+    if (this.mentionsBackend(requirement)) {
+      const backendModule: RequirementModule = {
+        id: `mod-${moduleIdCounter++}`,
+        title: 'Backend API',
+        description: this.extractBackendRequirements(requirement),
+        type: 'backend',
+        assignedAgent: AgentRole.BACKEND,
+        priority: 'high',
+        dependencies: [],
+        acceptanceCriteria: this.extractAcceptanceCriteria(requirement, 'backend'),
+      };
       
-      // Database should be built before backend
-      const backendModule = modules.find((m) => m.type === 'backend');
-      if (backendModule) {
+      // Backend should depend on database if it exists
+      const dbModule = modules.find((m) => m.type === 'database');
+      if (dbModule) {
         backendModule.dependencies.push(dbModule.id);
       }
       
-      modules.push(dbModule);
+      modules.push(backendModule);
     }
 
     // Always add QA

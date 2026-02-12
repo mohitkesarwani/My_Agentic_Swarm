@@ -64,7 +64,7 @@ export class AgenticSwarm {
       this.deployTool = new RenderDeployTool(deployConfig);
     }
 
-    this.log('info', 'Agentic Swarm initialized successfully with Security and Data agents');
+    this.log('info', 'Agentic Swarm initialized successfully');
   }
 
   /**

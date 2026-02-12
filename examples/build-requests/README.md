@@ -16,7 +16,11 @@ A comprehensive example that triggers all agent types:
 
 **Run with**:
 ```bash
-node tools/orchestrator/src/index.js examples/build-requests/user-management-system.json --enhanced
+# First build the project
+pnpm build
+
+# Then run the orchestrator
+node tools/orchestrator/dist/index.js examples/build-requests/user-management-system.json --enhanced
 ```
 
 **Expected Output**:
@@ -39,7 +43,11 @@ A backend-focused example:
 
 **Run with**:
 ```bash
-node tools/orchestrator/src/index.js examples/build-requests/blog-api.json --enhanced
+# First build the project
+pnpm build
+
+# Then run the orchestrator
+node tools/orchestrator/dist/index.js examples/build-requests/blog-api.json --enhanced
 ```
 
 **Expected Output**:
@@ -62,7 +70,11 @@ A full-stack example with frontend and backend:
 
 **Run with**:
 ```bash
-node tools/orchestrator/src/index.js examples/build-requests/product-catalog.json --enhanced
+# First build the project
+pnpm build
+
+# Then run the orchestrator
+node tools/orchestrator/dist/index.js examples/build-requests/product-catalog.json --enhanced
 ```
 
 **Expected Output**:
@@ -206,9 +218,10 @@ Set `applyToPlatform: true` to have the orchestrator apply generated code to the
 
 **Problem**: No output in solutions/
 
-**Solution**: Check that you're using the `--enhanced` flag:
+**Solution**: Check that you're using the `--enhanced` flag and built files:
 ```bash
-node tools/orchestrator/src/index.js request.json --enhanced
+pnpm build
+node tools/orchestrator/dist/index.js request.json --enhanced
 ```
 
 ### Task Dependencies Failed
