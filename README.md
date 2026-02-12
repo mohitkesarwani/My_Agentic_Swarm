@@ -42,6 +42,13 @@ docker compose -f infrastructure/docker/docker-compose.yml up -d
 pnpm dev
 ```
 
+**📖 New to Agentic Swarm?** See [ONBOARDING.md](./ONBOARDING.md) for a complete step-by-step guide covering:
+- Environment setup and prerequisites
+- Starting all services (API + Web + MongoDB)
+- Registering your first user and obtaining JWT tokens
+- Creating projects and submitting build requests
+- Troubleshooting common issues
+
 ## How the Orchestrator Works
 
 The Orchestrator (`tools/orchestrator`) accepts build requests and:
